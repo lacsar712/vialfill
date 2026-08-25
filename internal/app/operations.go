@@ -116,10 +116,10 @@ func (a *App) RampLoad(ctx context.Context, holder string, loadPct float64) erro
 }
 
 func (a *App) Trip(ctx context.Context, reason string) error {
-	// Batch abort: cancel any in-flight dosing-pump ramp before zeroing the
-	// pump. Otherwise the ramp goroutine keeps re-incrementing SterileFlowTPH
-	// after the conveyor has halted, so the pump opening (and the dispensed
-	// cumulative fill) keeps climbing past the abort.
+	// A batch abort must halt every in-flight dosepump ramp loop; otherwise the
+	// pump opening keeps climbing (and the cumulative fill reading creeps up)
+	// even after the conveyor has stopped. cancelAllSterileLoops tears down any
+	// goroutine that is still bumping SterileFlowTPH.
 	a.cancelAllSterileLoops()
 	snap := a.Snapshot()
 	comb := a.dosepump.Trip(snap.Dosepump)

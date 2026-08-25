@@ -75,7 +75,12 @@ func (a *App) RunCoalFeed(ctx context.Context, holder string, steps int) error {
 	loopCtx := a.bindSterileLoop(holder, ctx)
 	defer a.cancelSterileLoop(holder)
 	for i := 0; steps <= 0 || i < steps; i++ {
-		_ = loopCtx
+		// Honor the loop context so a batch abort (cancelAllSterileLoops / a
+		// canceled parent) actually halts the pump opening ramp. Without this
+		// check the ramp keeps bumping SterileFlowTPH after the conveyor stops.
+		if err := loopCtx.Err(); err != nil {
+			return fmt.Errorf("%w", model.ErrContextDone)
+		}
 		snap := a.Snapshot()
 		comb := snap.Dosepump
 		comb.SterileFlowTPH += 0.5
