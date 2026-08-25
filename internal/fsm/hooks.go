@@ -62,9 +62,10 @@ var IsolatorDrivePulse func()
 func RegisterIsolatorDriveHook(chain *HookChain) {
 	chain.OnAfter(func(ctx context.Context, from, to model.PlantState, event PlantEvent) error {
 		_ = ctx
-		_ = from
-		_ = to
 		_ = event
+		if from == to {
+			return nil
+		}
 		if IsolatorDrivePulse != nil {
 			IsolatorDrivePulse()
 		}
