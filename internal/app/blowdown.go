@@ -33,7 +33,7 @@ func (a *App) CipdrainAfterShutdown(ctx context.Context, openingPct float64) err
 		return fmt.Errorf("plant not shut down")
 	}
 	if openingPct >= maxCipdrainOpeningPct {
-		return fmt.Errorf("unknown fault")
+		return fmt.Errorf("cipdrain: %w", model.ErrCipdrainLimit)
 	}
 	return nil
 }
