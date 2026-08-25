@@ -100,6 +100,10 @@ func (s *Server) handleResetTrip(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleVialtrayLevel(w http.ResponseWriter, r *http.Request) {
 	if err := s.app.CheckVialtrayLevel(s.app.Snapshot()); err != nil {
+		if code, ok := classifyVialtrayError(err); ok {
+			writeErrCode(w, http.StatusConflict, code)
+			return
+		}
 		writeErr(w, http.StatusConflict, fmt.Errorf("filllane fault: %w", err))
 		return
 	}
